@@ -51,31 +51,23 @@ fclose($fpt);
 			if(row_count2>10000){
 				var batch3 = batch2;
 				big_dump = true;
-				//current_index--;
-				//batch2 = batches[current_index];
-			
-				//if(current_row ==0){
-					jQuery.ajax({
-						type: "POST",
-						url: "ajax.php?table="+batch3+"&start="+current_row,
-						data: {},
-						success: function(response){
-							if(current_index==batches.length-1){
-								clearInterval(notRunning);
-								fetchReport();	
-							}
-							if(row_count2>current_row){
-								current_row+=1000;
-							}else{
-								//current_index++;
-								//$('#img_'+batch2).attr("src", "images/done.png");						
-							}
-									
-						} 
-					});
-				// }else{
-
-				// } 
+				jQuery.ajax({
+					type: "POST",
+					url: "ajax.php?table="+batch3+"&start="+current_row,
+					data: {},
+					success: function(response){
+						if(current_index==batches.length-1){
+							clearInterval(notRunning);
+							fetchReport();	
+						}
+						if(row_count2>current_row){
+							current_row+=1000;
+						}else{
+							current_index++;
+							$('#img_'+batch2).attr("src", "images/done.png");						
+						}									
+					} 
+				});				
 			}else{
 				jQuery.ajax({
 					type: "POST",
