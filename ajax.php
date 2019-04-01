@@ -20,7 +20,12 @@ function export_data($table,$start,$limit){
 	}
 }
 $table = $_REQUEST['table'];
-$sql = export_data($table,0,1000000);
+if(isset($_REQUEST['start'])&&strlen($_REQUEST['start'])>0){
+	$start = $_REQUEST['start'];
+	$sql = export_data($table,$start,1000);
+}else{
+	$sql = export_data($table,0,1000000);
+}
 $fpt = fopen('dump.sql','a');
 fwrite($fpt,$sql);
 fclose($fpt);

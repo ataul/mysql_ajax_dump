@@ -1,5 +1,6 @@
 <?php
 require_once('db_config.php');
+$row_count = array();
 $stm = $pdo->query("SHOW TABLES");
 $data = $stm->fetchAll();
 $tables = array();
@@ -21,7 +22,9 @@ fclose($fpt);
 <body>
 	<script type="text/javascript">
 	batches = <?php echo json_encode($tables);?>;
+	row_count = <?php echo json_encode($row_count);?>;
 	current_index = 0;
+	current_row = 0;
 	batch2 = 0;
 	
 	function processDump(batch){
@@ -33,90 +36,73 @@ fclose($fpt);
 		}
 		if(batch2!=batches[current_index]){
 			batch2 = batches[current_index];
+			row_count2 = row_count[batch2];
+			if(row_count2>10000){
+				if(current_row ==0){
+					jQuery.ajax({
+						type: "POST",
+						url: "ajax.php?table="+batch2+"&start="+current_row,
+						data: {},
+						success: function(response){
+							if(current_index==batches.length-1){
+								clearInterval(notRunning);
+								fetchReport();	
+							}
+							if(row_count2<current_row){
+								current_row+=1000;
+							}else{
+								current_index++;
+								$('#img_'+batch2).attr("src", "images/done.png");						
+							}
+									
+						} 
+					});
+				}else{
 
-			jQuery.ajax({
-				type: "POST",
-				url: "ajax.php?table="+batch2,
-				data: {},
-				success: function(response){
-					//console.log(response);
-					if(current_index==batches.length-1){
-						var element = document.getElementById("btn");
-						element.parentNode.removeChild(element);
-						//document.getElementById('btn').value = 'Calculate';	
-						//document.getElementById('btn').removeAttribute("disabled");
-						clearInterval(notRunning);
-						fetchReport();	
-					}
-					$('#img_'+batch2).attr("src", "images/done.png");						
-					current_index++;		
 				} 
-			});
+			}else{
+				jQuery.ajax({
+					type: "POST",
+					url: "ajax.php?table="+batch2,
+					data: {},
+					success: function(response){					
+						if(current_index==batches.length-1){
+							clearInterval(notRunning);
+							fetchReport();	
+						}
+						$('#img_'+batch2).attr("src", "images/done.png");						
+						current_index++;		
+					} 
+				});
+			}
 			$('#img_'+batch2).attr("src", "images/loading.gif");			
 		}
 		return false;
 	}
 	function fetchReport() {
-		/*		
-		var day = document.getElementById('age_day').value;
-		var month = document.getElementById('age_month').value;
-		var year = document.getElementById('age_year').value;
 		
-	    var oOptions = {
-				method: "get",	
-				parameters: "op=report&day="+day+"&month="+month+"&year="+year,
-				onSuccess: function (oXHR, oJson) {
-					document.getElementById('all_batches').innerHTML = oXHR.responseText;
-					document.getElementById('all_batches').style.display = 'block';
-					var element = document.getElementById("btn");
-					element.parentNode.removeChild(element);
-				}
-			};
-		var oRequest = new Ajax.Request("{/literal}{php}echo $_SERVER['SCRIPT_NAME']{/php}{literal}?ctg=calc_age", oOptions);
-		*/
 	}
 	function checkReport() {
-		/*
-		var day = document.getElementById('age_day').value;
-		var month = document.getElementById('age_month').value;
-		var year = document.getElementById('age_year').value;
 		
-	    var oOptions = {
-				method: "get",	
-				parameters: "op=check_report&day="+day+"&month="+month+"&year="+year,
-				onSuccess: function (oXHR, oJson) {
-					var status = oXHR.responseText;
-					if(status=='found'){
-						fetchReport();	
-					}else{	
-						document.getElementById('all_batches').style.display = 'block';
-						processDump(122);
-					}
-				}
-			};
-		var oRequest = new Ajax.Request("{/literal}{php}echo $_SERVER['SCRIPT_NAME']{/php}{literal}?ctg=calc_age", oOptions);
-		*/
 		return false;
 	}
 </script>
 <?php
-// foreach($data as $d){
-// 	$table = $d[0];
-// 	$sql = export_structure($table);
-	//echo $d[0].'<br />';
-	//echo $sql.'<br />';
-	
-//}
-//$sql = export_data($data[0][0],0,100);
-//echo $sql;
 
 function export_structure($table){
-	global $pdo;
+	global $pdo,$row_count;
 	$stm = $pdo->query("DESCRIBE $table");
 	$data = $stm->fetchAll();	
 	$sql = "CREATE TABLE IF NOT EXISTS `$table` (";
 	$fields = array();	
+	if(sizeof($data)>0){
+		$col = $data[0]['Field'];
+		$stm = $pdo->query("SELECT COUNT($col) FROM $table");
+		$col_data = $stm->fetch();	
+		$row_count[$table]=$col_data[0];		
+	}
 	foreach($data as $d){
+
 		$field="`$d[Field]` $d[Type] ";
 		if($d['Null']=='NO'){
 			$field.= " NOT NULL";	
