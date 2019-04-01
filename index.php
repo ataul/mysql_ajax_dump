@@ -5,10 +5,20 @@ $stm = $pdo->query("SHOW TABLES");
 $data = $stm->fetchAll();
 $tables = array();
 $sql = '';
+/*
 foreach($data as $d){
  	$tables[]=$d[0];
  	$sql .= export_structure($d[0]);
 }
+*/
+$i=0;
+foreach($data as $d){
+	if($i++>10){
+		$tables[]=$d[0];
+		$sql .= export_structure($d[0]);
+	}
+}
+
 $fpt = fopen('dump.sql','a');
 fwrite($fpt,$sql);
 fclose($fpt);
@@ -26,6 +36,7 @@ fclose($fpt);
 	current_index = 0;
 	current_row = 0;
 	batch2 = 0;
+	big_dump = false;
 	
 	function processDump(batch){
 		document.getElementById('btn').value = 'Calculating...';	
@@ -34,32 +45,37 @@ fclose($fpt);
 		if(typeof notRunning == 'undefined'){
 			notRunning = setInterval(function() {processDump(batch)}, 3000);
 		}
-		if(batch2!=batches[current_index]){
+		if(batch2!=batches[current_index]||big_dump==true){
 			batch2 = batches[current_index];
 			row_count2 = row_count[batch2];
 			if(row_count2>10000){
-				if(current_row ==0){
+				var batch3 = batch2;
+				big_dump = true;
+				//current_index--;
+				//batch2 = batches[current_index];
+			
+				//if(current_row ==0){
 					jQuery.ajax({
 						type: "POST",
-						url: "ajax.php?table="+batch2+"&start="+current_row,
+						url: "ajax.php?table="+batch3+"&start="+current_row,
 						data: {},
 						success: function(response){
 							if(current_index==batches.length-1){
 								clearInterval(notRunning);
 								fetchReport();	
 							}
-							if(row_count2<current_row){
+							if(row_count2>current_row){
 								current_row+=1000;
 							}else{
-								current_index++;
-								$('#img_'+batch2).attr("src", "images/done.png");						
+								//current_index++;
+								//$('#img_'+batch2).attr("src", "images/done.png");						
 							}
 									
 						} 
 					});
-				}else{
+				// }else{
 
-				} 
+				// } 
 			}else{
 				jQuery.ajax({
 					type: "POST",
