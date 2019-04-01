@@ -1,13 +1,16 @@
 <?php
 require_once('db_config.php');
-$dsn = "mysql:host=localhost;dbname=".$dbname;
-$pdo = new PDO($dsn, $user, $passwd);
 $stm = $pdo->query("SHOW TABLES");
 $data = $stm->fetchAll();
 $tables = array();
+$sql = '';
 foreach($data as $d){
  	$tables[]=$d[0];
- }
+ 	$sql .= export_structure($d[0]);
+}
+$fpt = fopen('dump.sql','a');
+fwrite($fpt,$sql);
+fclose($fpt);
 ?>
 <!DOCTYPE html>
 <html>
@@ -45,11 +48,11 @@ foreach($data as $d){
 						clearInterval(notRunning);
 						fetchReport();	
 					}
-					$('img_'+batch2).attr("src", "images/done.png");						
+					$('#img_'+batch2).attr("src", "images/done.png");						
 					current_index++;		
 				} 
 			});
-			$('img_'+batch2).attr("src", "images/loading.gif");			
+			$('#img_'+batch2).attr("src", "images/loading.gif");			
 		}
 		return false;
 	}
