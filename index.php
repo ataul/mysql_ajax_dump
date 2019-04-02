@@ -109,6 +109,7 @@ function export_structure($table){
 		$col_data = $stm->fetch();	
 		$row_count[$table]=$col_data[0];		
 	}
+	$primary_key = array();
 	foreach($data as $d){
 
 		$field="`$d[Field]` $d[Type] ";
@@ -117,9 +118,22 @@ function export_structure($table){
 		}else{
 			$field.= " NULL";
 		}
+		if($d['Extra']=='auto_increment'){
+			$field.= " AUTO_INCREMENT";	
+		}
+		if($d['Default']!=''){
+			$field.= " Default '$d[Default]'";	
+		}
+		if($d['Key']=='PRI'){
+			$primary_key[]=$d['Field'];
+		}
 		$fields[]=$field;
 	}
-	$sql.=implode(',',$fields).');';
+	$sql.=implode(',',$fields);
+	if(sizeof($primary_key)>0){
+		$sql.= ', PRIMARY KEY('.implode(',',$primary_key).')';
+	}
+	$sql.=');';
 	return $sql;
 }
 function export_data($table,$start,$limit){
