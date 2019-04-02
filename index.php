@@ -5,20 +5,10 @@ $stm = $pdo->query("SHOW TABLES");
 $data = $stm->fetchAll();
 $tables = array();
 $sql = '';
-/*
 foreach($data as $d){
  	$tables[]=$d[0];
  	$sql .= export_structure($d[0]);
 }
-*/
-$i=0;
-foreach($data as $d){
-	if($i++>10){
-		$tables[]=$d[0];
-		$sql .= export_structure($d[0]);
-	}
-}
-
 $fpt = fopen('dump.sql','a');
 fwrite($fpt,$sql);
 fclose($fpt);
