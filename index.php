@@ -36,6 +36,7 @@ fclose($fpt);
 	current_index = 0;
 	current_row = 0;
 	batch2 = 0;
+	limit = 500;
 	big_dump = false;
 	
 	function processDump(batch){
@@ -53,7 +54,7 @@ fclose($fpt);
 				big_dump = true;
 				jQuery.ajax({
 					type: "POST",
-					url: "ajax.php?table="+batch3+"&start="+current_row,
+					url: "ajax.php?table="+batch3+"&start="+current_row+"&limit="+limit,
 					data: {},
 					success: function(response){
 						if(current_index==batches.length-1){
@@ -61,7 +62,7 @@ fclose($fpt);
 							fetchReport();	
 						}
 						if(row_count2>current_row){
-							current_row+=1000;
+							current_row+=limit;
 						}else{
 							current_index++;
 							$('#img_'+batch2).attr("src", "images/done.png");						
@@ -133,23 +134,7 @@ function export_structure($table){
 	if(sizeof($primary_key)>0){
 		$sql.= ', PRIMARY KEY('.implode(',',$primary_key).')';
 	}
-	$sql.=');';
-	return $sql;
-}
-function export_data($table,$start,$limit){
-	global $pdo;
-	$stm = $pdo->query("SELECT * FROM $table LIMIT $start,$limit");
-	$data = $stm->fetchAll();
-	$sql = "INSERT INTO $table VALUES(";
-	echo '<pre>';
-	foreach($data as $d){
-		$s = "";
-		for($i=0;$i<sizeof($d)/2;$i++){
-			$s .= "'".$d[$i]."',";
-		}
-		$sql .= substr($s,0,strlen($s)-1)."),(";		
-	}
-	$sql = substr($sql,0,strlen($sql)-2).";";
+	$sql.=");\n";
 	return $sql;
 }
 ?>

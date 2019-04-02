@@ -12,7 +12,7 @@ function export_data($table,$start,$limit){
 		}
 		$sql .= substr($s,0,strlen($s)-1)."),(";		
 	}
-	$sql = substr($sql,0,strlen($sql)-2).";";
+	$sql = substr($sql,0,strlen($sql)-2).";\n";
 	if(sizeof($data)>0){
 		return $sql;
 	}else{
@@ -22,7 +22,8 @@ function export_data($table,$start,$limit){
 $table = $_REQUEST['table'];
 if(isset($_REQUEST['start'])&&strlen($_REQUEST['start'])>0){
 	$start = $_REQUEST['start'];
-	$sql = export_data($table,$start,1000);
+	$limit = $_REQUEST['limit'];
+	$sql = export_data($table,$start,$limit);
 }else{
 	$sql = export_data($table,0,1000000);
 }
