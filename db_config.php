@@ -2,6 +2,7 @@
 $user = "";
 $passwd = "";
 $dbname = "";
-$dsn = "mysql:host=localhost;dbname=".$dbname;
-$pdo = new PDO($dsn, $user, $passwd);
+$host = "localhost";
+$dsn = "mysql:host=$host;dbname=".$dbname;
+require_once("include.php");
 ?>
