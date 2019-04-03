@@ -20,8 +20,15 @@ if($pdo){
 <head>
 	<title>MySQL Ajax Dump</title>	
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
-<body>	
+<body>
+<main class="main h-100 w-100">
+		<div class="container h-100">
+			<div class="row h-100">
+				<div class="col-sm-10 col-md-8 col-lg-6 mx-auto d-table h-100">
+					<div class="d-table-cell align-middle">
+	
 <?php
 if(!$pdo){
 	require_once('template/login.php');
@@ -56,7 +63,8 @@ if(!$pdo){
 					success: function(response){
 						if(current_index==batches.length-1){
 							clearInterval(notRunning);
-							fetchReport();	
+							$('#all_tables').html('<div class="alert alert-info">SQL file should download automatically. If it doesn\'t work, please click <a href="dump.sql">here</a></div>');
+							location.href='dump.sql';	
 						}
 						if(row_count2>current_row){
 							current_row+=limit;
@@ -93,13 +101,24 @@ if(!$pdo){
 		return false;
 	}
 </script>
-<button id="btn" onclick="processDump();">Export</button>
-<div id="all_batches">
-	<?php foreach($tables as $table):?>
-		<img src="images/pending.png" id="img_<?php echo $table;?>" alt="Pending" />&nbsp;&nbsp;<?php echo $table;?><br />
-	<?php endforeach;?>
-</div>
+<div class="card">
+	<div class="card-body">
+		<div class="m-sm-4">
+			<button class="btn btn-lg btn-primary" id="btn" onclick="processDump();">Export</button>
+			<div id="all_tables">
+				<?php foreach($tables as $table):?>
+					<img src="images/pending.png" id="img_<?php echo $table;?>" alt="Pending" />&nbsp;&nbsp;<?php echo $table;?><br />
+				<?php endforeach;?>
+			</div>
+		</div>	
+	</div>	
+</div>	
 <?php } ?>
+				</div>
+			</div>
+		</div>
+	</div>
+</main>	
 	<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>
 </body>
