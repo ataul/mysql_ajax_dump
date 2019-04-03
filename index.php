@@ -83,7 +83,8 @@ if(!$pdo){
 					success: function(response){					
 						if(current_index==batches.length-1){
 							clearInterval(notRunning);
-							fetchReport();	
+							$('#all_tables').html('<div class="alert alert-info">SQL file should download automatically. If it doesn\'t work, please click <a href="dump.sql">here</a></div>');
+							location.href='dump.sql';
 						}
 						$('#img_'+batch2).attr("src", "images/done.png");						
 						current_index++;		
