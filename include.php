@@ -9,18 +9,12 @@ function skipped_table(){
 	$file = file('skipped_table.txt');
 	return $file;
 }
-
 function save_skipped_table($tables){
-unlink('skipped_table.txt');
-$fpt = fopen('skipped_table.txt','w');
-$data = '';
-foreach($tables as $table){
-	$data.=$table."\n";
+	unlink('skipped_table.txt');
+	$fpt = fopen('skipped_table.txt','w');
+	fwrite($fpt,$tables);
+	fclose($fpt);
 }
-fwrite($fpt,$data);
-fclose($fpt);
-}
-
 function export_structure($table){
 	global $pdo,$row_count;
 	$stm = $pdo->query("DESCRIBE $table");

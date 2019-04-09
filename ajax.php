@@ -19,15 +19,25 @@ function export_data($table,$start,$limit){
 		return "";
 	}
 }
-$table = $_REQUEST['table'];
-if(isset($_REQUEST['start'])&&strlen($_REQUEST['start'])>0){
-	$start = $_REQUEST['start'];
-	$limit = $_REQUEST['limit'];
-	$sql = export_data($table,$start,$limit);
-}else{
-	$sql = export_data($table,0,1000000);
+$op = $_REQUEST['op'];
+switch($op){
+	case 'dump':
+		$table = $_REQUEST['table'];
+		if(isset($_REQUEST['start'])&&strlen($_REQUEST['start'])>0){
+			$start = $_REQUEST['start'];
+			$limit = $_REQUEST['limit'];
+			$sql = export_data($table,$start,$limit);
+		}else{
+			$sql = export_data($table,0,1000000);
+		}
+		$fpt = fopen('dump.sql','a');
+		fwrite($fpt,$sql);
+		fclose($fpt);
+	break;
+	case 'skip_table':
+		$tables = $_REQUEST['tables'];
+		$tables = str_replace(',',"\n",$tables);
+		save_skipped_table($tables);
+	break;
 }
-$fpt = fopen('dump.sql','a');
-fwrite($fpt,$sql);
-fclose($fpt);
 ?>

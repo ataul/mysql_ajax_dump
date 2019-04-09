@@ -6,9 +6,13 @@ if($pdo){
 	$data = $stm->fetchAll();
 	$tables = array();
 	$sql = '';
+	$skipped_tables = file('skipped_table.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 	foreach($data as $d){
-		$tables[]=$d[0];
-		$sql .= export_structure($d[0]);
+		$table = $d[0];
+		if(!in_array(trim($table),$skipped_tables)){
+			$tables[]=$table;			
+		}
+		$sql .= export_structure($table);
 	}
 	$fpt = fopen('dump.sql','a');
 	fwrite($fpt,$sql);
@@ -43,12 +47,30 @@ if(!$pdo){
 	batch2 = 0;
 	limit = 500;
 	big_dump = false;
-	
+	function cancenSkipTable(){
+		$('#skip_table_options').hide();
+	}
+	function saveSkipTable(){
+		var tables = '';
+		$.each($('.skipped_table:checked'),function(){
+			tables += $(this).val()+",";			
+		});
+		jQuery.ajax({
+			type: "POST",
+			url: "ajax.php?op=skip_table&tables="+tables,
+			data: {},
+			success: function(response){					
+				location.reload();		
+			} 
+		});
+	}
 	function addCheckBox(){
+		$('#skip_table_options').show();
+		$('#export_btn').hide();
 		$.each($('.img_table'), function (){
 			var id=$(this).attr('id');
-			id = id.substring(3,id.length);
-			$(this).append('<input type="checkbox" name="skipped_table[]" value="'.id.'" />');
+			id = id.substring(4,id.length);
+			$(this).after('<input type="checkbox" class="skipped_table" name="skipped_table[]" value="'+id+'" />');
 			$(this).remove();
 		});
 	}
@@ -68,7 +90,7 @@ if(!$pdo){
 				big_dump = true;
 				jQuery.ajax({
 					type: "POST",
-					url: "ajax.php?table="+batch3+"&start="+current_row+"&limit="+limit,
+					url: "ajax.php?op=dump&table="+batch3+"&start="+current_row+"&limit="+limit,
 					data: {},
 					success: function(response){
 						if(current_index==batches.length-1){
@@ -116,7 +138,13 @@ if(!$pdo){
 	<div class="card-body">
 		<div class="m-sm-4">
 		<a href="javascript:" onclick="addCheckBox();">Skipped table</a>
-			<button class="btn btn-lg btn-primary" id="btn" onclick="processDump();">Export</button>
+		<div id="skip_table_options">
+			<button class="btn btn-lg btn-primary" id="btn" onclick="saveSkipTable();">Save</button>
+			<button class="btn btn-lg btn-danger" id="btn" onclick="cancenSkipTable();">Cancel</button>
+		</div>
+		
+		
+			<button class="btn btn-lg btn-primary" id="export_btn" id="btn" onclick="processDump();">Export</button>
 			<div id="all_tables">
 				<?php foreach($tables as $table):?>
 					<img src="images/pending.png" class="img_table" id="img_<?php echo $table;?>" alt="Pending" />&nbsp;&nbsp;<?php echo $table;?><br />

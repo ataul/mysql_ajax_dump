@@ -4,3 +4,7 @@
 .project-name{
 	margin: 20px 0;
 }
+#skip_table_options{
+	display:none;
+	padding-top: 30px;
+}
