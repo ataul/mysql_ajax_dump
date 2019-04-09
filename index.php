@@ -44,6 +44,15 @@ if(!$pdo){
 	limit = 500;
 	big_dump = false;
 	
+	function addCheckBox(){
+		$.each($('.img_table'), function (){
+			var id=$(this).attr('id');
+			id = id.substring(3,id.length);
+			$(this).append('<input type="checkbox" name="skipped_table[]" value="'.id.'" />');
+			$(this).remove();
+		});
+	}
+	
 	function processDump(batch){
 		document.getElementById('btn').value = 'Calculating...';	
 		document.getElementById('btn').setAttribute("disabled", "disabled");		
@@ -106,10 +115,11 @@ if(!$pdo){
 <div class="card">
 	<div class="card-body">
 		<div class="m-sm-4">
+		<a href="javascript:" onclick="addCheckBox();">Skipped table</a>
 			<button class="btn btn-lg btn-primary" id="btn" onclick="processDump();">Export</button>
 			<div id="all_tables">
 				<?php foreach($tables as $table):?>
-					<img src="images/pending.png" id="img_<?php echo $table;?>" alt="Pending" />&nbsp;&nbsp;<?php echo $table;?><br />
+					<img src="images/pending.png" class="img_table" id="img_<?php echo $table;?>" alt="Pending" />&nbsp;&nbsp;<?php echo $table;?><br />
 				<?php endforeach;?>
 			</div>
 		</div>	
