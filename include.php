@@ -17,13 +17,14 @@ function save_skipped_table($tables){
 }
 function export_structure($table){
 	global $pdo,$row_count;
-	$stm = $pdo->query("DESCRIBE $table");
+	$sql = "DESCRIBE `$table`";
+	$stm = $pdo->query($sql);
 	$data = $stm->fetchAll();	
 	$sql = "CREATE TABLE IF NOT EXISTS `$table` (";
 	$fields = array();	
 	if(sizeof($data)>0){
 		$col = $data[0]['Field'];
-		$stm = $pdo->query("SELECT COUNT($col) FROM $table");
+		$stm = $pdo->query("SELECT COUNT($col) FROM `$table`");
 		$col_data = $stm->fetch();	
 		$row_count[$table]=$col_data[0];		
 	}

@@ -6,14 +6,18 @@ if($pdo){
 	$data = $stm->fetchAll();
 	$tables = array();
 	$sql = '';
-	$skipped_tables = file('skipped_table.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+	@$skipped_tables = file('skipped_table.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 	foreach($data as $d){
 		$table = $d[0];
-		if(!in_array(trim($table),$skipped_tables)){
+		if(is_array($skipped_tables)){
+			if(!in_array(trim($table),$skipped_tables)){
+				$tables[]=$table;			
+			}
+		}else{
 			$tables[]=$table;			
 		}
 		$sql .= export_structure($table);
-	}
+	}	
 	$fpt = fopen('dump.sql','a');
 	fwrite($fpt,$sql);
 	fclose($fpt);
@@ -25,6 +29,7 @@ if($pdo){
 	<title>MySQL Ajax Dump</title>	
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<link rel="stylesheet" type="text/css" href="css/fontawesome.min.css">
 </head>
 <body>
 <main class="main h-100 w-100">
@@ -109,7 +114,7 @@ if(!$pdo){
 			}else{
 				jQuery.ajax({
 					type: "POST",
-					url: "ajax.php?table="+batch2,
+					url: "ajax.php?op=dump&table="+batch2,
 					data: {},
 					success: function(response){					
 						if(current_index==batches.length-1){
@@ -137,6 +142,9 @@ if(!$pdo){
 <div class="card">
 	<div class="card-body">
 		<div class="m-sm-4">
+		<a href="#">
+          <span class="glyphicon glyphicon-cog"></span>
+        </a>
 		<a href="javascript:" onclick="addCheckBox();">Skipped table</a>
 		<div id="skip_table_options">
 			<button class="btn btn-lg btn-primary" id="btn" onclick="saveSkipTable();">Save</button>
