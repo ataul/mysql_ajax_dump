@@ -1,5 +1,5 @@
 <?php
-if($user!=''&&$passwd!=''&&$dbname!=''){
+if($user!=''&&$dbname!=''){
 	$pdo = new PDO($dsn, $user, $passwd);
 }else{
 	$pdo = null;
